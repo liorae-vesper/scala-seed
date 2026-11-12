@@ -1,0 +1,58 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "enabledManagers": [
+    "sbt",
+    "scalafmt",
+    "github-actions"
+  ],
+  "timezone": "America/Sao_Paulo",
+  "schedule": [
+    "before 8am on monday"
+  ],
+  "minimumReleaseAge": "7 days",
+  "internalChecksFilter": "strict",
+  "dependencyDashboardApproval": false,
+  "automerge": false,
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "packageRules": [
+    {
+      "matchManagers": [
+        "sbt"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "groupName": "Scala and sbt patch updates",
+      "prBodyNotes": [
+        "Run ./sbtw writeDependencyManifest and commit the reviewed project/dependencies.sha256 change before merging."
+      ]
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "pinDigests": true
+    },
+    {
+      "matchPackageNames": [
+        "org.scala-lang:scala3-library_3"
+      ],
+      "allowedVersions": "<4.0.0"
+    },
+    {
+      "matchPackageNames": [
+        "org.scala-sbt:sbt"
+      ],
+      "description": "A maintainer must review and repin project/sbt-launcher.sha256.",
+      "prBodyNotes": [
+        "Update the reviewed launcher SHA-256 in project/sbt-launcher.sha256; the bootstrap intentionally fails until the new version and digest agree."
+      ]
+    }
+  ]
+}

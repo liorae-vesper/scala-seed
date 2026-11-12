@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Download only the pinned launcher and check its SHA-256 before every execution.
+set -euo pipefail
+root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$root"
+version="$(sed -n 's/^sbt.version=//p' project/build.properties | tr -d '\r')"
+if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "Invalid sbt.version; a stable, exact version is required." >&2
+  exit 1
+fi
+read -r pinned_version expected < project/sbt-launcher.sha256
+if [[ "$pinned_version" != "$version" || ! "$expected" =~ ^[0-9a-f]{64}$ ]]; then
+  echo "No matching launcher checksum. Review and update project/sbt-launcher.sha256." >&2
+  exit 1
+fi
+hash_file() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    shasum -a 256 "$1" | awk '{print $1}'
+  fi
+}
+cache="$root/.cache/sbt"
+launcher="$cache/sbt-launch-$version.jar"
+mkdir -p "$cache"
+if [[ ! -f "$launcher" ]]; then
+  temporary="$(mktemp "$cache/launcher.XXXXXXXX")"
+  trap 'rm -f -- "$temporary"' EXIT
+  curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+    --tlsv1.2 --retry 3 --connect-timeout 15 --max-time 180 \
+    "https://repo.maven.apache.org/maven2/org/scala-sbt/sbt-launch/$version/sbt-launch-$version.jar" \
+    --output "$temporary"
+  if [[ "$(hash_file "$temporary")" != "$expected" ]]; then
+    echo "Launcher checksum mismatch. Refusing to run downloaded code." >&2
+    exit 1
+  fi
+  mv -- "$temporary" "$launcher"
+  trap - EXIT
+fi
+if [[ "$(hash_file "$launcher")" != "$expected" ]]; then
+  echo "Launcher checksum mismatch. Refusing to run cached code." >&2
+  exit 1
+fi
+java_command="java"
+if [[ -n "${JAVA_HOME:-}" ]]; then java_command="$JAVA_HOME/bin/java"; fi
+jvm_options=()
+while IFS= read -r option || [[ -n "$option" ]]; do
+  if [[ -n "$option" && "$option" != \#* ]]; then jvm_options+=("$option"); fi
+done < .jvmopts
+exec "$java_command" "${jvm_options[@]}" \
+  "-Dsbt.global.base=$cache/global" \
+  "-Dsbt.override.build.repos=true" \
+  "-Dsbt.repository.config=$root/project/repositories" \
+  -jar "$launcher" "$@"

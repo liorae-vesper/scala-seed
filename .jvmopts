@@ -1,0 +1,4 @@
+-Xms256m
+-Xmx2g
+-Dfile.encoding=UTF-8
+-Dsbt.supershell=false

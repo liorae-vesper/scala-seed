@@ -1,0 +1,19 @@
+# Build outputs, downloaded tools, and editor state
+**/target/
+.cache/
+.bsp/
+.bloop/
+.metals/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+# Local secrets
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+
+# Native experimental lockfiles are not used by this template
+/deps.lock
