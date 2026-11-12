@@ -5,19 +5,15 @@ dependency integrity checks, and GitHub Actions. Use it as the starting point fo
 or library, then replace the sample `example.Greeter` with your own code.
 
 Scala Next means the current stable feature release of Scala 3, rather than an LTS,
-release candidate, or nightly. This template uses **Scala 3.10.1** and **sbt 2.0.12**,
-verified on **2026-11-12**. See [VERSIONS.md](VERSIONS.md) for sources and compatibility.
-
+release candidate, or nightly. This template uses **Scala 3.10.1** and **sbt 2.0.12**.
 ## Start
 
 Install a maintained **JDK 21 or JDK 25**, Bash, curl, and either `sha256sum` or `shasum`.
-Python 3 is needed only for bootstrap tests. Linux and macOS can use the wrapper directly;
-on Windows, use WSL. A native Windows wrapper is not included.
+Linux and macOS can use the wrapper directly; on Windows, use WSL. A native Windows wrapper is not included.
 
 ```sh
 ./sbtw check
 ./sbtw audit
-python3 scripts/test_bootstrap.py
 ```
 
 The first run downloads the exact sbt launcher and checks it against the committed SHA-256.
@@ -117,10 +113,6 @@ SHA-256, and update the version/digest pair in `project/sbt-launcher.sha256` tog
 Do not replace a checksum merely to bypass a mismatch; investigate the artifact first.
 
 ## Use this template
-
-After publishing, enable **Settings → General → Template repository**. Then select
-**Use this template → Create a new repository**. See [PUBLISHING.md](PUBLISHING.md) for
-publishing the supplied files with the intended GitHub account.
 
 For each generated project:
 

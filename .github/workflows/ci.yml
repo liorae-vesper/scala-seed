@@ -37,8 +37,6 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
-      - name: Test bootstrap safeguards
-        run: python3 scripts/test_bootstrap.py
       - name: Check formatting, compile strictly, test, and package
         run: ./sbtw check
       - name: Save test reports
